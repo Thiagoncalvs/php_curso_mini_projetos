@@ -1,0 +1,51 @@
+networks:
+  default:
+    name: 'php_curso_network'
+    external: true
+
+volumes:
+ php_curso_postgres-data:
+
+services:
+  php_curso_postgres:
+    image: postgres:15.2
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: db_php_curso
+    volumes:
+    - php_curso_postgres-data:/var/lib/postgresql/data
+
+  php_curso_pgadmin4:
+    image: dpage/pgadmin4:8.10
+    ports:
+      - 63331:80
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
+    volumes:
+    - php_curso_postgres-data:/var/lib/postgresql/data
+
+  php_curso_spa:
+    container_name: spa_php_curso
+    image: php:8.2-cli
+    depends_on:
+      - php_curso_postgres
+    ports:
+      - 8080:80
+    restart: unless-stopped
+    volumes:
+      - ./spa:/spa
+      - php_curso_postgres-data:/var/lib/postgresql/data
+    working_dir: /spa
+    command: >
+      bash -c "apt-get update &&
+               apt-get install -y libpq-dev &&
+               docker-php-ext-install pdo_pgsql &&
+               curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
+               php -S 0.0.0.0:80 -t /spa"
+    tty: true
