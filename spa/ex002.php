@@ -8,9 +8,9 @@
 <body>
     <nav><li><ul><a href="/">HOME</a></ul></li></nav>
 
-    <h1>Dados do servidor</h1>
     <?php
-        phpinfo()
+        date_default_timezone_set("America/Sao_Paulo"); //TimeZone do Brasil GMT-3
+        echo "Hoje é dia ".date('D/M/Y - d/m/y')." e a hora atual é ".date('G:I:S - g:i:s')." e a TimeZone é GMT".date('T');
     ?>
 </body>
 </html>
